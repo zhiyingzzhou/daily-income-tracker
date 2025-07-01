@@ -1,0 +1,24 @@
+name: 发布扩展
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
+      - run: mkdir -p dist
+      - run: npm run package
+      - name: 创建Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: 'dist/*.vsix'
+          body_path: RELEASE-NOTES.md

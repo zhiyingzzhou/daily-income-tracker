@@ -1,0 +1,210 @@
+{
+  "name": "daily-income-tracker",
+  "displayName": "实时收入计算器",
+  "description": "实时计算今日收入，支持多种配置和云同步功能",
+  "version": "1.0.0",
+  "publisher": "zhiyingzhou",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhiyingzzhou/daily-income-tracker"
+  },
+  "icon": "src/assets/icon.png",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "dailyIncome.openSettings",
+        "title": "打开收入设置",
+        "category": "实时收入计算器"
+      },
+      {
+        "command": "dailyIncome.startWork",
+        "title": "开始工作",
+        "category": "实时收入计算器"
+      },
+      {
+        "command": "dailyIncome.endWork",
+        "title": "结束工作",
+        "category": "实时收入计算器"
+      },
+      {
+        "command": "dailyIncome.reset",
+        "title": "重置今日数据",
+        "category": "实时收入计算器"
+      }
+    ],
+    "configuration": {
+      "title": "实时收入计算器",
+      "properties": {
+        "dailyIncome.monthlyIncome": {
+          "type": "number",
+          "default": 10000,
+          "description": "月收入（元）"
+        },
+        "dailyIncome.workDays": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "default": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "description": "工作日 (0=周日, 1=周一, 2=周二, 3=周三, 4=周四, 5=周五, 6=周六)"
+        },
+        "dailyIncome.autoStartWork": {
+          "type": "boolean",
+          "default": false,
+          "description": "是否在工作时间自动开始工作"
+        },
+        "dailyIncome.useScheduledWorkTime": {
+          "type": "boolean",
+          "default": false,
+          "description": "是否使用预定工作时间计算收入（从设置的工作开始时间算起，而非实际开始工作时间）"
+        },
+        "dailyIncome.workStartTime": {
+          "type": "string",
+          "default": "09:00",
+          "description": "工作开始时间 (HH:MM)"
+        },
+        "dailyIncome.workEndTime": {
+          "type": "string",
+          "default": "18:00",
+          "description": "工作结束时间 (HH:MM)"
+        },
+        "dailyIncome.precisionLevel": {
+          "type": "number",
+          "default": 2,
+          "description": "显示精度（小数位数）"
+        },
+        "dailyIncome.overtimeEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否启用加班工资计算"
+        },
+        "dailyIncome.overtimeRate": {
+          "type": "number",
+          "default": 1.5,
+          "description": "加班工资倍率"
+        },
+        "dailyIncome.deductForEarlyLeave": {
+          "type": "boolean",
+          "default": false,
+          "description": "早退是否扣钱"
+        },
+        "dailyIncome.autoSync": {
+          "type": "boolean",
+          "default": false,
+          "description": "启用云同步"
+        },
+        "dailyIncome.syncProvider": {
+          "type": "string",
+          "enum": [
+            "webdav",
+            "s3",
+            "aliyun-oss",
+            "local"
+          ],
+          "default": "local",
+          "description": "同步服务提供商"
+        },
+        "dailyIncome.syncConfig": {
+          "type": "object",
+          "default": {},
+          "description": "同步配置（仅存储非敏感信息）"
+        },
+        "dailyIncome.updateFrequency": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "fast",
+            "normal",
+            "slow",
+            "custom"
+          ],
+          "default": "auto",
+          "description": "收入计算更新频率 (auto=自适应，fast=1秒，normal=3秒，slow=5秒，custom=自定义)"
+        },
+        "dailyIncome.customUpdateFrequency": {
+          "type": "number",
+          "default": 3000,
+          "description": "自定义更新频率（毫秒）,仅在updateFrequency设置为'custom'时生效"
+        },
+        "dailyIncome.blurStatusBarIncome": {
+          "type": "boolean",
+          "default": false,
+          "description": "隐私模式 - 在状态栏中隐藏收入金额，仅显示工作时间"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package-extension",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test",
+    "build-webview": "webpack --mode production",
+    "dev-webview": "webpack --mode development --watch",
+    "dev": "node scripts/dev.js",
+    "dev:sh": "bash scripts/dev.sh",
+    "dev:win": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1",
+    "build": "node scripts/build.js",
+    "package-extension": "npm run build-webview && webpack --config webpack.extension.config.js",
+    "package": "vsce package --out dist",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@types/node": "16.x",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.4",
+    "autoprefixer": "^10.4.15",
+    "css-loader": "^6.8.1",
+    "css-minimizer-webpack-plugin": "^7.0.2",
+    "eslint": "^8.47.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "mini-css-extract-plugin": "^2.9.2",
+    "postcss": "^8.4.31",
+    "postcss-loader": "^7.3.3",
+    "prettier": "^3.6.2",
+    "style-loader": "^3.3.3",
+    "tailwindcss": "^3.3.3",
+    "terser-webpack-plugin": "^5.3.14",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-manifest-plugin": "^5.0.1"
+  },
+  "dependencies": {
+    "axios": "^1.5.0",
+    "dayjs": "^1.11.9",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

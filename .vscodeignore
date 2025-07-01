@@ -1,0 +1,57 @@
+# 源代码目录
+.vscode/**
+.vscode-test/**
+src/**
+!src/assets/**
+
+# 开发配置文件
+.editorconfig
+.eslintrc.json
+.gitignore
+.prettierrc
+.prettierignore
+.lintstagedrc
+tsconfig.json
+webpack.config.js
+postcss.config.js
+commitlint.config.js
+
+# 开发脚本
+scripts/**
+!scripts/build.js
+
+# 开发文档
+DEVELOPMENT.md
+INSTALLATION.md
+**/*.map
+
+# Git相关
+.git/**
+.github/**
+.husky/**
+.gitmessage
+
+# Node.js文件
+node_modules/**
+out/**
+**/*.ts
+
+# 临时文件和日志
+.DS_Store
+.history
+*.log
+*.tmp
+
+# 打包相关
+**/*.vsix
+**/*.zip
+**/*.tgz
+
+# 测试文件
+test/**
+**/tests/**
+**/__tests__/**
+**/jest**
+**/mocha**
+**/*.test.*
+**/*.spec.* 
