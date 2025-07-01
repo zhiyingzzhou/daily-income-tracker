@@ -2,7 +2,7 @@
   "name": "daily-income-tracker",
   "displayName": "实时收入计算器",
   "description": "实时计算今日收入，支持多种配置和云同步功能",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "zhiyingzhou",
   "repository": {
     "type": "git",
