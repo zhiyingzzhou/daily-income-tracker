@@ -33,10 +33,7 @@ export const SettingsApp: React.FC = () => {
   const sendMessage = (type: string, payload?: any) => {
     if (typeof vscode !== 'undefined') {
       const message = { type, ...payload };
-      console.log('发送消息到扩展:', message);
       vscode.postMessage(message);
-    } else {
-      console.warn('vscode API不可用');
     }
   };
 

@@ -80,6 +80,22 @@ const cleanOutput = () => {
   log(colors.green, 'CLEAN', '输出目录已清理 ✓');
 };
 
+// 执行初始构建
+const initialBuild = () => {
+  log(colors.blue, 'BUILD', '执行初始构建...');
+  
+  try {
+    const result = require('child_process').execSync('npm run build-webview', { 
+      stdio: ['ignore', 'pipe', 'pipe'],
+      encoding: 'utf8'
+    });
+    log(colors.green, 'BUILD', 'WebView初始构建完成 ✓');
+  } catch (error) {
+    log(colors.red, 'BUILD', `WebView初始构建失败: ${error.message}`);
+    process.exit(1);
+  }
+};
+
 // 主函数
 const main = async () => {
   try {
@@ -88,6 +104,9 @@ const main = async () => {
 
     // 清理输出
     cleanOutput();
+    
+    // 执行初始构建
+    initialBuild();
 
     console.log(`\n${colors.cyan}========================================${colors.reset}`);
     console.log(`${colors.cyan}${colors.bright}  Daily Income 扩展开发环境${colors.reset}`);
@@ -132,6 +151,20 @@ const main = async () => {
       }
     });
 
+    // 3. 构建扩展部分
+    log(colors.blue, 'EXTENSION', '构建VSCode扩展部分...');
+    try {
+      const extResult = require('child_process').execSync('webpack --config webpack.extension.config.js', { 
+        stdio: ['ignore', 'pipe', 'pipe'],
+        encoding: 'utf8'
+      });
+      log(colors.green, 'EXTENSION', '扩展构建完成 ✓');
+    } catch (error) {
+      log(colors.red, 'EXTENSION', `扩展构建失败: ${error.message}`);
+      // 不退出，因为我们可能只是想更新webview部分
+      console.warn(`${colors.yellow}警告: 扩展构建失败，但会继续监视文件变化${colors.reset}`);
+    }
+
     // 等待编译完成
     await new Promise(resolve => setTimeout(resolve, 3000));
 
@@ -149,7 +182,8 @@ const main = async () => {
 
     console.log(`${colors.green}🔧 监听服务：${colors.reset}`);
     console.log(`${colors.magenta}  • TypeScript 编译: 监听 src/**/*.ts${colors.reset}`);
-    console.log(`${colors.cyan}  • React/CSS 构建: 监听 src/webview/**/*${colors.reset}\n`);
+    console.log(`${colors.cyan}  • React/CSS 构建: 监听 src/webview/**/*${colors.reset}`);
+    console.log(`${colors.blue}  • 扩展构建: 自动在配置文件变化时重建${colors.reset}\n`);
 
     console.log(
       `${colors.yellow}💡 提示：代码修改会自动编译，刷新调试窗口即可看到效果${colors.reset}\n`
@@ -170,6 +204,43 @@ const main = async () => {
         log(colors.red, 'WEBPACK', `Webpack 监听进程退出，代码: ${code}`);
       }
     });
+
+    // 监听扩展核心文件变化，重新构建扩展部分
+    log(colors.blue, 'WATCH', '开始监听扩展核心文件变化...');
+    
+    // 监听webpack.extension.config.js和tsconfig.json的变化
+    const configWatcher = fs.watch('webpack.extension.config.js', (eventType, filename) => {
+      if (eventType === 'change') {
+        log(colors.yellow, 'CHANGE', `检测到${filename}变化，重新构建扩展...`);
+        try {
+          const extResult = require('child_process').execSync('webpack --config webpack.extension.config.js', { 
+            stdio: ['ignore', 'pipe', 'pipe'],
+            encoding: 'utf8'
+          });
+          log(colors.green, 'REBUILD', '扩展重新构建完成 ✓');
+        } catch (error) {
+          log(colors.red, 'REBUILD', `扩展重新构建失败: ${error.message}`);
+        }
+      }
+    });
+    
+    const tsConfigWatcher = fs.watch('tsconfig.json', (eventType, filename) => {
+      if (eventType === 'change') {
+        log(colors.yellow, 'CHANGE', `检测到${filename}变化，重新构建扩展...`);
+        try {
+          const extResult = require('child_process').execSync('webpack --config webpack.extension.config.js', { 
+            stdio: ['ignore', 'pipe', 'pipe'],
+            encoding: 'utf8'
+          });
+          log(colors.green, 'REBUILD', '扩展重新构建完成 ✓');
+        } catch (error) {
+          log(colors.red, 'REBUILD', `扩展重新构建失败: ${error.message}`);
+        }
+      }
+    });
+    
+    processes.push({ kill: () => configWatcher.close() });
+    processes.push({ kill: () => tsConfigWatcher.close() });
   } catch (error) {
     log(colors.red, 'ERROR', `启动失败: ${error.message}`);
     cleanup();

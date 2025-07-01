@@ -39,8 +39,6 @@ export class SettingsWebviewProvider {
 
       // 处理来自webview的消息
       this._panel.webview.onDidReceiveMessage(async (message: any) => {
-        console.log('WebView消息:', message);
-
         switch (message.type) {
           case 'updateConfig':
             await this._updateConfiguration(message.config);
@@ -74,7 +72,7 @@ export class SettingsWebviewProvider {
       });
 
       // 发送初始数据
-      this._sendInitialData().catch(console.error);
+      this._sendInitialData().catch(() => {});
     }
   }
 
@@ -105,7 +103,7 @@ export class SettingsWebviewProvider {
         },
       });
     } catch (error) {
-      console.error('发送数据到WebView失败:', error);
+      // 忽略错误
     }
   }
 
@@ -150,15 +148,12 @@ export class SettingsWebviewProvider {
         ...sensitiveConfig,
       };
     } catch (error) {
-      console.error('获取同步配置失败:', error);
       return {};
     }
   }
 
   private async _updateConfiguration(config: any) {
     try {
-      console.log('从WebView收到配置更新:', config);
-
       // 使用ConfigManager更新配置
       const success = await this._configManager.updateConfig(config);
 
@@ -176,7 +171,6 @@ export class SettingsWebviewProvider {
 
       await this._sendInitialData();
     } catch (error) {
-      console.error('配置保存失败:', error);
       vscode.window.showErrorMessage('配置保存失败: ' + error);
     }
   }
@@ -217,24 +211,15 @@ export class SettingsWebviewProvider {
         mainScript = this._cleanPath(manifest['main.js'] || mainScript);
         vendorScript = manifest['vendor.js'] ? this._cleanPath(manifest['vendor.js']) : '';
         mainStyles = manifest['main.css'] ? this._cleanPath(manifest['main.css']) : '';
-        
-        console.log('资源路径:', {
-          mainScript,
-          vendorScript,
-          mainStyles
-        });
       }
     } catch (error) {
-      console.error('加载资源清单失败:', error);
+      // 忽略错误
     }
 
     // 检查文件是否存在
     const checkPath = (filePath: string): boolean => {
       const fullPath = path.join(this._context.extensionPath, 'dist', 'webview', filePath);
       const exists = fs.existsSync(fullPath);
-      if (!exists) {
-        console.error(`资源文件不存在: ${fullPath}`);
-      }
       return exists;
     };
 
@@ -248,11 +233,10 @@ export class SettingsWebviewProvider {
           const jsFiles = files.filter(file => file.startsWith('main.') && file.endsWith('.js'));
           if (jsFiles.length > 0) {
             mainScript = jsFiles[0];
-            console.log(`找到备用主脚本: ${mainScript}`);
           }
         }
       } catch (error) {
-        console.error('查找备用脚本失败:', error);
+        // 忽略错误
       }
     }
 
@@ -285,7 +269,7 @@ export class SettingsWebviewProvider {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' 'unsafe-eval'; img-src ${webview.cspSource} data:;">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' 'unsafe-eval' 'unsafe-inline'; img-src ${webview.cspSource} data:; font-src ${webview.cspSource}; connect-src ${webview.cspSource};">
             <title>实时收入计算器设置</title>
             ${stylesTag}
             <style>
@@ -308,7 +292,6 @@ export class SettingsWebviewProvider {
             <script nonce="${nonce}">
                 // 注入VSCode API
                 const vscode = acquireVsCodeApi();
-                console.log('VSCode API已加载:', typeof vscode);
             </script>
             ${vendorScriptTag}
             <script nonce="${nonce}" src="${mainScriptUri}"></script>
