@@ -2,6 +2,29 @@
 
 一个强大的 VSCode 扩展，帮助您实时计算今日收入，提升工作效率与价值感知。
 
+## 📸 效果展示
+
+<div align="center">
+  <img src="demo/dashboard.png" alt="仪表盘界面" width="600" />
+  <p>仪表盘界面</p>
+</div>
+
+<div align="center" style="display: flex; justify-content: space-between; flex-wrap: wrap; margin-top: 20px;">
+  <div style="flex: 1; min-width: 300px; margin: 10px;">
+    <img src="demo/settings.png" alt="基础设置界面" width="400" />
+    <p>基础设置界面</p>
+  </div>
+  <div style="flex: 1; min-width: 300px; margin: 10px;">
+    <img src="demo/sync.png" alt="云同步设置" width="400" />
+    <p>云同步设置界面</p>
+  </div>
+</div>
+
+<div align="center">
+  <img src="demo/statusbar.png" alt="状态栏显示" width="600" />
+  <p>状态栏显示效果</p>
+</div>
+
 ## ✨ 功能特色
 
 - 📊 **实时收入计算** - 基于工作时长自动计算今日收入
